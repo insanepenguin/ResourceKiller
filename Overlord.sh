@@ -42,9 +42,14 @@ RunC
 count = 1
 while [ $count -le 16 ];
 do
-	#Measure here ifstat every 1, PS every 5 
-	StartCollection
+	#Measure here ifstat every 1, PS every 5
+	if [ (($count % 5)) -eq 0 ];
+		StartCollection
+	fi
+
+	bash ifstat.sh
 	
+	sleep 1
 	echo "$count"
 	(($count++))
 done
