@@ -7,6 +7,26 @@ FileCheck "df.txt"
 FileCheck "ifstat.txt"
 FileCheck "ps.txt"
 }
+function System() {
+	ps -o pid,ppid,cmd,%mem,%cpu --sort=-%mem | head | sed 's/ /,/g'|cut -d ',' -f4-5 >> ps.txt
+	iostat >> iostat.txt
+	df >> df.txt
+	echo "****************************************************************" >> ps.txt
+	echo "****************************************************************" >> iostat.txt
+	echo "****************************************************************" >> df.txt
+}
+function Stat() {
+	pidof ifstat.sh >> pid.txt
+	# while [ $SECONDS -le 30 ]; do
+	# 	ifstat >> ifstat.txt
+	# 	echo "****************************************************************" >> ifstat.txt
+	# 	sleep 1
+	# done
+	ifstat >> ifstat.txt
+	echo "****************************************************************" >> ifstat.txt
+
+}
+
 # function StartAPMS() {
 # start "APM1" &
 # start "APM2" &
@@ -24,13 +44,12 @@ function RunC() {
 	./APM6 192.168.195.128 &
 }
 function StartCollection() {
-	bash ps.sh
-	bash ifstat.sh
+	Stat
+	System
 } 
 function Kill() {
 	killall APM*
-	Kill ps.sh
-	Kill ifstat.sh
+	
 }
 
 function FileCheck() {
@@ -47,7 +66,7 @@ do
 		StartCollection
 	fi
 
-	bash ifstat.sh
+	Stat
 	
 	sleep 1
 	echo "$count"
