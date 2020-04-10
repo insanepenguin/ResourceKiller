@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#TO PROPERLY RUN THE PROGRAM, PASS IN 2 ARGUMENTS (1st one is how many seconds to run it) (2nd one is the IP to do it)
+
+date > ps.txt
+date > iostat.txt
+date > ifstat.txt
+date > df.txt
+
 function Prep() {
 FileCheck "pid.txt"
 FileCheck "iostat.txt"
@@ -7,8 +14,9 @@ FileCheck "df.txt"
 FileCheck "ifstat.txt"
 FileCheck "ps.txt"
 }
+#FIX THIS FUNCTION
 function System() {
-	ps -o pid,ppid,cmd,%mem,%cpu --sort=-%mem | head | sed 's/ /,/g'|cut -d ',' -f4-5 >> ps.txt
+	ps -a -o pid,ppid,cmd,%mem,%cpu --sort=-%mem >> ps.txt
 	iostat >> iostat.txt
 	df >> df.txt
 	echo "****************************************************************" >> ps.txt
@@ -17,31 +25,20 @@ function System() {
 }
 function Stat() {
 	pidof ifstat.sh >> pid.txt
-	# while [ $SECONDS -le 30 ]; do
-	# 	ifstat >> ifstat.txt
-	# 	echo "****************************************************************" >> ifstat.txt
-	# 	sleep 1
-	# done
 	ifstat >> ifstat.txt
 	echo "****************************************************************" >> ifstat.txt
 
 }
 
-# function StartAPMS() {
-# start "APM1" &
-# start "APM2" &
-# start "APM3" &
-# start "APM4" &
-# start "APM5" &
-# start "APM6" &
-# }
+ipToUse=$2
+
 function RunC() {
-	./APM1 192.168.122.1 &
-	./APM2 192.168.122.1 &
-	./APM3 192.168.122.1 &
-	./APM4 192.168.122.1 &
-	./APM5 192.168.122.1 &
-	./APM6 192.168.122.1 &
+	./APM1 $ipToUse &
+	./APM2 $ipToUse &
+	./APM3 $ipToUse &
+	./APM4 $ipToUse &
+	./APM5 $ipToUse &
+	./APM6 $ipToUse &
 }
 function StartCollection() {
 	Stat
@@ -73,16 +70,4 @@ do
 	((count++))
 done
 Kill
-# iostat >> iostat.txt
-# df >> df.txt
-
-# sleep 65
-
-#gets line but now specify cpu and mem %s
-cat ps.txt | grep "APM1" >> APM1_metrics.csv
-cat ps.txt | grep "APM2" >> APM2_metrics.csv
-cat ps.txt | grep "APM3" >> APM3_metrics.csv
-cat ps.txt | grep "APM4" >> APM4_metrics.csv
-cat ps.txt | grep "APM5" >> APM5_metrics.csv
-cat ps.txt | grep "APM6" >> APM6_metrics.csv
 
