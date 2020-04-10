@@ -36,12 +36,12 @@ function Stat() {
 # start "APM6" &
 # }
 function RunC() {
-	./APM1 192.168.195.128 &
-	./APM2 192.168.195.128 &
-	./APM3 192.168.195.128 &
-	./APM4 192.168.195.128 &
-	./APM5 192.168.195.128 &
-	./APM6 192.168.195.128 &
+	./APM1 192.168.122.1 &
+	./APM2 192.168.122.1 &
+	./APM3 192.168.122.1 &
+	./APM4 192.168.122.1 &
+	./APM5 192.168.122.1 &
+	./APM6 192.168.122.1 &
 }
 function StartCollection() {
 	Stat
@@ -58,19 +58,19 @@ if test -f "$1"; then
 fi
 }
 RunC
-count = 1
-while [ $count -le 16 ];
+count=1
+while [ $count -le $1 ];
 do
 	#Measure here ifstat every 1, PS every 5
-	if [ (($count % 5)) -eq 0 ];
+	if [ $(($count % 5)) == 0 ];
+	then
 		StartCollection
+	else
+		Stat
 	fi
-
-	Stat
-	
 	sleep 1
 	echo "$count"
-	(($count++))
+	((count++))
 done
 Kill
 # iostat >> iostat.txt
