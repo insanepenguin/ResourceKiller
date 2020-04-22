@@ -1,12 +1,12 @@
 #!/bin/bash
 
-#TO PROPERLY RUN THE PROGRAM, PASS IN 2 ARGUMENTS (1st one is how many seconds to run it) (2nd one is the IP to do it)
+
 
 date > ps.txt
 date > iostat.txt
 date > ifstat.txt
 date > df.txt
-
+#Adding the date to overwite any past runs
 function Prep() {
 FileCheck "pid.txt"
 FileCheck "iostat.txt"
@@ -14,24 +14,21 @@ FileCheck "df.txt"
 FileCheck "ifstat.txt"
 FileCheck "ps.txt"
 }
-#FIX THIS FUNCTION
-function System() {
-	ps -a -o pid,ppid,cmd,%mem,%cpu --sort=-%mem >> ps.txt
-	iostat >> iostat.txt
-	df >> df.txt
-	echo "****************************************************************" >> ps.txt
-	echo "****************************************************************" >> iostat.txt
-	echo "****************************************************************" >> df.txt
-}
-function Stat() {
-	pidof ifstat.sh >> pid.txt
-	ifstat >> ifstat.txt
-	echo "****************************************************************" >> ifstat.txt
 
+function collect() {
+	ps -a -o cmd, -o %cpu, -o %mem | grep "..APM*" >> Process.csv
+	#Find gets the % mem and % CPU of each process running on the system the filters for the APM files
+	iostat -d sda | awk '{print $1,",",$4}' >> iostat.txt
+	#
+	df -BM / | awk '{print $3}' | grep  'M' >> df.txt
+	#
+	ifstat --interval=1 ens33 | tr -d \\n  | awk '{ print $24,",", $26 }' >> Network.csv
+	#Finds the TX and RX data rates coming from ens33 the outside facing interface
 }
 
-ipToUse=$2
-
+ipToUse=192.168.195.129
+#hostname -I | sed 's/\s.*$//'
+echo $ipToUse
 function RunC() {
 	./APM1 $ipToUse &
 	./APM2 $ipToUse &
@@ -39,14 +36,11 @@ function RunC() {
 	./APM4 $ipToUse &
 	./APM5 $ipToUse &
 	./APM6 $ipToUse &
+	#Starts all of the C programs
 }
-function StartCollection() {
-	Stat
-	System
-} 
 function Kill() {
 	killall APM*
-	
+	#Kills all of the APM named processes
 }
 
 function FileCheck() {
@@ -55,19 +49,13 @@ if test -f "$1"; then
 fi
 }
 RunC
-count=1
-while [ $count -le $1 ];
+end=$((SECONDS+60))
+#Running for exactly 15 mins
+while [ $SECONDS -lt $end ];
 do
-	#Measure here ifstat every 1, PS every 5
-	if [ $(($count % 5)) == 0 ];
-	then
-		StartCollection
-	else
-		Stat
-	fi
-	sleep 1
-	echo "$count"
-	((count++))
+	echo "Collecting"
+	collect
+	sleep 5
 done
 Kill
 
