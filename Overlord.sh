@@ -7,6 +7,12 @@ date > iostat.txt
 date > ifstat.txt
 date > df.txt
 date > System_Metrics.csv
+date > APM1_Metrics.csv
+date > APM2_Metrics.csv
+date > APM3_Metrics.csv
+date > APM4_Metrics.csv
+date > APM5_Metrics.csv
+date > APM6_Metrics.csv
 echo "Seconds, RX, TX, Disk Write, Available Space" >> System_Metrics.csv
 
 #Globally declare variables to use.
@@ -24,12 +30,14 @@ ens=`ifconfig | awk '{print $1}' | head -1 | sed 's/://g'`
 function collect() {
 	seconds=$SECONDS
 	#ps -a -o cmd, -o %cpu, -o %mem | grep "..APM*" >> APM_Metrics.csv
-	ps -a -o cmd, -o %cpu, -o %mem | grep "..APM1" >> APM1_Metrics.csv
-	ps -a -o cmd, -o %cpu, -o %mem | grep "..APM2" >> APM2_Metrics.csv
-	ps -a -o cmd, -o %cpu, -o %mem | grep "..APM3" >> APM3_Metrics.csv
-        ps -a -o cmd, -o %cpu, -o %mem | grep "..APM4" >> APM4_Metrics.csv
-	ps -a -o cmd, -o %cpu, -o %mem | grep "..APM5" >> APM5_Metrics.csv
-        ps -a -o cmd, -o %cpu, -o %mem | grep "..APM6" >> APM6_Metrics.csv
+	#ps -a -o %c  -o ,%C, -o %mem
+	#ps -a -o cmd, -o %cpu, -o %mem | grep "..APM1" >> APM1_Metrics.csv
+	ps -a -o cmd  -o ,%C, -o %mem | grep "..APM1" >> APM1_Metrics.csv
+	ps -a -o cmd  -o ,%C, -o %mem | grep "..APM2" >> APM2_Metrics.csv
+	ps -a -o cmd  -o ,%C, -o %mem | grep "..APM3" >> APM3_Metrics.csv
+    ps -a -o cmd  -o ,%C, -o %mem | grep "..APM4" >> APM4_Metrics.csv
+	ps -a -o cmd  -o ,%C, -o %mem | grep "..APM5" >> APM5_Metrics.csv
+    ps -a -o cmd  -o ,%C, -o %mem | grep "..APM6" >> APM6_Metrics.csv
 
 	#Find gets the % mem and % CPU of each process running on the system the filters for the APM files
 	Disk_Write=`iostat -d sda | awk '{print $4}' | tail -2`
@@ -73,7 +81,7 @@ fi
 }
 
 RunC
-end=$((SECONDS+30))
+end=$((SECONDS+900))
 #Running for exactly 15 mins
 while [ $SECONDS -lt $end ];
 do
